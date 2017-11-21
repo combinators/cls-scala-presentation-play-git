@@ -4,7 +4,7 @@
 This project complements the Combinatory Logic Synthesizer (CL)S framework by a website to present and get inhabitants
 from. Different solutions to the same inhabitation question will be hosted via Git branches.
 
-For more information see our [documentation project](https://github.com/combinators/cls-scala-docs).
+For more information see our [documentation project](https://combinators.github.io/).
 
 Existing users please refer to the [CHANGELOG](CHANGELOG.md) for news.
 
@@ -23,7 +23,7 @@ Currently, Scala 2.11 and 2.12 are supported.
 
 ## Examples
 
-Please refer to the [documentation project](https://github.com/combinators/cls-scala-docs).
+Please refer to the [documentation project](https://combinators.github.io/).
 
 ## Help and Contributions
 
