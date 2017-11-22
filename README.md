@@ -1,8 +1,8 @@
 # cls-scala-presentation-play-git
 ## A Play-based web frontend for hosting cls-scala inhabitants via Git
 
-This project complements the Combinatory Logic Synthesizer (CL)S framework by a website to present and get inhabitants
-from. Different solutions to the same inhabitation question will be hosted via Git branches.
+This project complements the Combinatory Logic Synthesizer (CL)S framework by a website to present inhabitants and download them.
+Different solutions to the same inhabitation question will be hosted via Git branches.
 
 For more information see our [documentation project](https://combinators.github.io/).
 
