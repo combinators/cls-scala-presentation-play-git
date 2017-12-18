@@ -125,7 +125,7 @@ abstract class InhabitationController(webJars: WebJarsUtil) extends InjectedCont
     def add[R](inhabitationResult: InhabitationResult[R], repositoryPath: Path): Results =
       add[R](inhabitationResult)(new Persistable {
         type T = R
-        override def rawText(elem: T): String = elem.toString
+        override def rawText(elem: T): Array[Byte] = elem.toString.getBytes
         override def path(elem: T): Path = repositoryPath
       })
 
@@ -152,12 +152,23 @@ abstract class InhabitationController(webJars: WebJarsUtil) extends InjectedCont
             case (others, next) => others :+ next
           }
           val persistenceActions = self.persistenceActions.product(inhabitationResult.interpretedTerms).map {
-            case (ps, r) => ps :+ (() => persistable.persist(root.resolve(sourceDirectory), r))
+            case (ps, r) => ps :+ (() => persistable.persist(root.resolve(sourceDirectory), r).deleteOnExit())
           }
           val infinite = self.infinite || inhabitationResult.isInfinite
           val incomplete = self.incomplete
         }
       }
+    }
+
+    /** Adds an external (non-inhabitation generated) artifact to the result repository. */
+    def addExternalArtifact[T](inhabitationResult: T)(implicit persistable: Persistable.Aux[T]): Results = new Results {
+      val targets = self.targets
+      val raw = self.raw
+      val persistenceActions = self.persistenceActions.map { actions: Seq[() => Unit] =>
+        actions :+ (() => persistable.persist(root.resolve(sourceDirectory), inhabitationResult).deleteOnExit())
+      }
+      val infinite = self.infinite
+      val incomplete = self.incomplete
     }
 
     /** Adds all results of an InhabitationResultVector. **/
