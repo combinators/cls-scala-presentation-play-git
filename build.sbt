@@ -42,8 +42,7 @@ lazy val root = (Project(id = "cls-scala-presentation-play-git", base = file("."
       libraryDependencies ++= Seq(
         "org.combinators" %% "cls-scala" % "2.0.0",
         "org.combinators" %% "templating" % "1.0.0",
-        "org.scalactic" %% "scalactic" % "3.0.4" % "test",
-        "org.scalatest" %% "scalatest" % "3.0.4" % "test",
+        "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test",
         "org.eclipse.jgit" % "org.eclipse.jgit" % "4.9.0.201710071750-r",
         "org.webjars" %% "webjars-play" % "2.6.1",
         "org.webjars" % "bootstrap" % "3.3.7-1"
