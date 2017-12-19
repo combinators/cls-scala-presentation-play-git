@@ -43,7 +43,8 @@ lazy val root = (Project(id = "cls-scala-presentation-play-git", base = file("."
         "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test",
         "org.eclipse.jgit" % "org.eclipse.jgit" % "4.9.0.201710071750-r",
         "org.webjars" %% "webjars-play" % "2.6.1",
-        "org.webjars" % "bootstrap" % "3.3.7-1"
+        "org.webjars" % "bootstrap" % "3.3.7-1",
+        "commons-io" % "commons-io" % "2.6"
       ),
       sourceDirectories in (Compile, TwirlKeys.compileTemplates) := Seq(sourceDirectory.value / "main" / "html-templates"),
       headerMappings := headerMappings.value ++ Seq(

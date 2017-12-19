@@ -18,16 +18,17 @@ package org.combinators.cls.git
 
 import java.nio.file._
 
-import shapeless.feat.Enumeration
-import org.combinators.cls.inhabitation.Tree
+import org.apache.commons.io.FileUtils
 import org.combinators.cls.interpreter._
-import org.combinators.templating.persistable.Persistable
-import org.combinators.cls.types.Type
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.ResetCommand.ResetType
 import org.eclipse.jgit.revwalk.RevCommit
 import org.webjars.play.WebJarsUtil
+import play.api.inject.ApplicationLifecycle
 import play.api.mvc._
+
+import scala.concurrent.Future
+import scala.util.Try
 
 /** Serves a website to access Git repositories with computed and serialized inhabitants.
   * To get the website, just inherit from this class, implement the abstract fields/methods
@@ -42,14 +43,20 @@ import play.api.mvc._
   * If there are multiple inhabitants they go into branches of the git hostet at `/myresults/myresults.git`.
   *
   * @param webJars Helper to get WebJars like Bootstrap.
+  * @param applicationLifecycle application lifecycle to register cleanup of temporary files on shutdown
   */
-abstract class InhabitationController(webJars: WebJarsUtil) extends InjectedController {
+abstract class InhabitationController(webJars: WebJarsUtil, applicationLifecycle: ApplicationLifecycle) extends InjectedController {
   /** A temporary place to store the Git repository on disk. */
   private lazy val root: Path = {
     val tmp = Files.createTempDirectory("inhabitants")
-    tmp.toFile.deleteOnExit()
+    applicationLifecycle.addStopHook(() => {
+      Future.fromTry(Try {
+        FileUtils.deleteDirectory(tmp.toFile)
+      })
+    })
     tmp
   }
+
   /** The temporary Git file structure. */
   private lazy val git = Git.init().setDirectory(root.toFile).call()
   /** A mutable collection to store which inhabitants are already serialized. */
@@ -61,128 +68,8 @@ abstract class InhabitationController(webJars: WebJarsUtil) extends InjectedCont
   /** The path (relative to the Git root) where to store solutions. */
   val sourceDirectory: Path = Paths.get(".")
 
-  /** A type class for heterogeneous vector of inhabitation Results */
-  sealed trait InhabitationResultVector[R] {
-    def add(newResults: R, oldResults: Results): Results
-  }
-
-  /** Type class instances to build up result vectors */
-  sealed trait InhabitationResultVectorInstances {
-    implicit def persistable[R](implicit persist: Persistable.Aux[R]): InhabitationResultVector[InhabitationResult[R]] =
-      new InhabitationResultVector[InhabitationResult[R]] {
-        def add(newResults: InhabitationResult[R], oldResults: Results): Results =
-          oldResults.add[R](newResults)(persist)
-      }
-
-    implicit def product[L, R]
-    (implicit persist: Persistable.Aux[R],
-      vector: InhabitationResultVector[L]): InhabitationResultVector[(L, InhabitationResult[R])] =
-      new InhabitationResultVector[(L, InhabitationResult[R])] {
-        def add(newResults: (L, InhabitationResult[R]), oldResults: Results): Results =
-          vector.add(newResults._1, oldResults).add[R](newResults._2)(persist)
-      }
-  }
-
-  /** Collection of type class instances to build up result vectors */
-  object InhabitationResultVector extends InhabitationResultVectorInstances {
-    def apply[R](implicit vectorInst: InhabitationResultVector[R]): InhabitationResultVector[R] =
-      vectorInst
-  }
-
-  /** A collection of persistable inhabitation results. */
-  sealed trait Results {
-    self =>
-    /** Targets for this result collection. */
-    val targets: Seq[(Type, Option[BigInt])]
-    /** Raw inhabitant terms without any interpretation. */
-    val raw: Enumeration[Seq[Tree]]
-    /** Are there infinitely many inhabitants? */
-    val infinite: Boolean
-    /** Did any target not produce an inhabitant? */
-    val incomplete: Boolean
-    /** Actions to perform with each inhabitant (e.g. store to disk) */
-    val persistenceActions: Enumeration[Seq[() => Unit]]
-
-    /** Runs the action associated with the `number`-th inhabitant.
-      * Most actions will just store the inhabitants to disk/Git (hence the method name).
-      *
-      * @param number index of the action to run.
-      */
-    def storeToDisk(number: Long): Unit = {
-      val result = persistenceActions.index(number)
-      result.foreach(_.apply())
-    }
-
-
-    /**
-      * Adds an inhabitation result to the collection.
-      * Create a default persistable using `inhabitationResult.toString` for serialization and `repositoryPath`.
-      *
-      * @param inhabitationResult the result to store.
-      * @param repositoryPath     where to store `inhabitationResult` relative to the Git repository root.
-      * @return a new collection including `inhabitationResult`.
-      */
-    def add[R](inhabitationResult: InhabitationResult[R], repositoryPath: Path): Results =
-      add[R](inhabitationResult)(new Persistable {
-        type T = R
-        override def rawText(elem: T): Array[Byte] = elem.toString.getBytes
-        override def path(elem: T): Path = repositoryPath
-      })
-
-    /** Adds a [[Persistable]] result to the collection.
-      * Persistance actions will be performed relative to the Git repository root.
-      *
-      * @param inhabitationResult the result to store.
-      * @return a new collection including `inhabitationResult`.
-      */
-    def add[T](inhabitationResult: InhabitationResult[T])(implicit persistable: Persistable.Aux[T]): Results = {
-      val size = inhabitationResult.size
-
-      size match {
-        case Some(x) if x == 0 => new Results {
-          val targets = self.targets :+ (inhabitationResult.target, size)
-          val raw = self.raw
-          val persistenceActions = self.persistenceActions
-          val infinite = self.infinite
-          val incomplete = true
-        }
-        case _ => new Results {
-          val targets = self.targets :+ (inhabitationResult.target, inhabitationResult.size)
-          val raw = self.raw.product(inhabitationResult.terms).map {
-            case (others, next) => others :+ next
-          }
-          val persistenceActions = self.persistenceActions.product(inhabitationResult.interpretedTerms).map {
-            case (ps, r) => ps :+ (() => persistable.persist(root.resolve(sourceDirectory), r).deleteOnExit())
-          }
-          val infinite = self.infinite || inhabitationResult.isInfinite
-          val incomplete = self.incomplete
-        }
-      }
-    }
-
-    /** Adds an external (non-inhabitation generated) artifact to the result repository. */
-    def addExternalArtifact[T](inhabitationResult: T)(implicit persistable: Persistable.Aux[T]): Results = new Results {
-      val targets = self.targets
-      val raw = self.raw
-      val persistenceActions = self.persistenceActions.map { actions: Seq[() => Unit] =>
-        actions :+ (() => persistable.persist(root.resolve(sourceDirectory), inhabitationResult).deleteOnExit())
-      }
-      val infinite = self.infinite
-      val incomplete = self.incomplete
-    }
-
-    /** Adds all results of an InhabitationResultVector. **/
-    def addAll[R](results: R)(implicit canAddAll: InhabitationResultVector[R]): Results =
-      canAddAll.add(results, this)
-  }
-  /** An empty collection of inhabitation results. */
-  object Results extends Results {
-    val targets: Seq[(Type, Option[BigInt])] = Seq.empty
-    val raw: Enumeration[Seq[Tree]] = Enumeration.singleton(Seq.empty)
-    val persistenceActions: Enumeration[Seq[() => Unit]] = Enumeration.singleton(Seq.empty)
-    val infinite: Boolean = false
-    val incomplete: Boolean = false
-  }
+  /** The computed result location (root/sourceDirectory) */
+  implicit final val resultLocation: ResultLocation = ResultLocation(root.resolve(sourceDirectory))
 
   /** The results to present. */
   val results: Results
