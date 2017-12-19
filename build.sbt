@@ -37,8 +37,6 @@ lazy val root = (Project(id = "cls-scala-presentation-play-git", base = file("."
   .settings(
       moduleName := "cls-scala-presentation-play-git",
 
-
-      crossScalaVersions := Seq("2.11.11", scalaVersion.value),
       libraryDependencies ++= Seq(
         "org.combinators" %% "cls-scala" % "2.0.0",
         "org.combinators" %% "templating" % "1.0.0",
