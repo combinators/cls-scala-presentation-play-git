@@ -51,6 +51,9 @@ lazy val root = (Project(id = "cls-scala-presentation-play-git", base = file("."
         FileType("js") -> HeaderCommentStyle.cStyleBlockComment,
         FileType("routes") -> HeaderCommentStyle.hashLineComment
       ),
+
+      sources in (Test, play.sbt.routes.RoutesKeys.routes) ++= ((unmanagedResourceDirectories in Test).value * "routes").get,
+
       unmanagedSources.in(Compile, headerCreate) ++= sources.in(Compile, TwirlKeys.compileTemplates).value,
       unmanagedSources.in(Compile, headerCreate) ++= sources.in(Compile, resourceDirectories).value
     )

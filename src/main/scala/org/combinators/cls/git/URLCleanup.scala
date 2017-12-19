@@ -18,8 +18,12 @@ package org.combinators.cls.git
 
 import play.api.mvc.InjectedController
 
-/** Cleans leading double slashes of urls.
-  * Turns `http://foo.bar//baz/` into `http://foo.bar/baz/`.
+/** Cleans trailing double slashes of urls.
+  * Turns `http://foo.bar/baz/` into `http://foo.bar/baz`.
+  * To do anything useful this requires the following routing entry (present in [[org.combinators.cls.git.Routes]]):
+  * {{{
+  *   GET &sol;*path&sol; org.combinators.cls.git.URLCleanup.untrail(path)
+  * }}}
   */
 class URLCleanup extends InjectedController {
   def untrail(path: String) = Action {

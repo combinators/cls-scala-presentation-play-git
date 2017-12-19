@@ -15,4 +15,4 @@
 GET   /vassets/*file                 controllers.Assets.versioned(path="/public", file: Asset)
 GET   /js/*file                      controllers.Assets.at(path="/org/combinators/cls/git/", file)
 GET   /*path/                        org.combinators.cls.git.URLCleanup.untrail(path)
-->   /webjars                        webjars.Routes
+->    /webjars                       webjars.Routes
