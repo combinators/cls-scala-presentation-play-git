@@ -75,7 +75,7 @@ sealed trait Results {
           case (others, next) => others :+ next
         }
         val persistenceActions = self.persistenceActions.product(inhabitationResult.interpretedTerms).map {
-          case (ps, r) => ps :+ (() => persistable.persist(storeRelativeTo, r))
+          case (ps, r) => ps :+ (() => { persistable.persist(storeRelativeTo, r); () })
         }
         val infinite = self.infinite || inhabitationResult.isInfinite
         val incomplete = self.incomplete
@@ -89,7 +89,7 @@ sealed trait Results {
     val targets = self.targets
     val raw = self.raw
     val persistenceActions = self.persistenceActions.map { actions: Seq[() => Unit] =>
-      actions :+ (() => persistable.persist(storeRelativeTo, inhabitationResult))
+      actions :+ (() => { persistable.persist(storeRelativeTo, inhabitationResult); () })
     }
     val infinite = self.infinite
     val incomplete = self.incomplete
