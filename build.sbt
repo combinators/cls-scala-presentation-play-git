@@ -5,12 +5,9 @@ import play.twirl.sbt.Import.TwirlKeys
 
 lazy val commonSettings = Seq(
   organization := "org.combinators",
-  releaseVersionBump := sbtrelease.Version.Bump.Minor,
-  releaseIgnoreUntrackedFiles := true,
 
   scalaVersion := "2.12.4",
   crossScalaVersions := Seq("2.11.12", scalaVersion.value),
-  releaseCrossBuild := true,
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -36,7 +33,6 @@ lazy val root = (Project(id = "cls-scala-presentation-play-git", base = file("."
   .disablePlugins(PlayLayoutPlugin)
   .settings(
       moduleName := "cls-scala-presentation-play-git",
-
       libraryDependencies ++= Seq(
         "org.combinators" %% "cls-scala" % "2.0.0-RC1",
         "org.combinators" %% "templating" % "1.0.0-RC1",
@@ -61,39 +57,17 @@ lazy val root = (Project(id = "cls-scala-presentation-play-git", base = file("."
 
 
 lazy val publishSettings = Seq(
-  publishMavenStyle := true,
-  publishArtifact in Test := false,
-  pomIncludeRepository := { _ => false },
-  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-  publishTo := { version { (v: String) =>
-    val nexus = "https://oss.sonatype.org/"
-    if (v.trim.endsWith("SNAPSHOT"))
-      Some("snapshots" at nexus + "content/repositories/snapshots")
-    else
-      Some("releases" at nexus + "service/local/staging/deploy/maven2")
-  }.value },
   homepage := Some(url("https://combinators.org")),
   licenses := Seq("Apache 2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt")),
   scmInfo := Some(ScmInfo(url("https://www.github.com/combinators/cls-scala-presentation-play-git"), "scm:git:git@github.com:combinators/cls-scala-presentation-play-git.git")),
-  pomExtra := (
-    <developers>
-      <developer>
-        <id>JanBessai</id>
-        <name>Jan Bessai</name>
-        <url>http://janbessai.github.io/</url>
-      </developer>
-      <developer>
-        <id>BorisDuedder</id>
-        <name>Boris Düdder</name>
-        <url>http://duedder.net/</url>
-      </developer>
-      <developer>
-        <id>heineman</id>
-        <name>George T. Heineman</name>
-        <url>http://www.cs.wpi.edu/~heineman</url>
-      </developer>
-    </developers>
-    )
+  developers := List(
+    Developer("JanBessai", "Jan Bessai", "jan.bessai@tu-dortmund.de", url("http://janbessai.github.io")),
+    Developer("heineman", "George T. Heineman", "heineman@wpi.edu", url("http://www.cs.wpi.edu/~heineman")),
+    Developer("BorisDuedder", "Boris Düdder", "boris.d@di.ku.dk", url("http://duedder.net"))
+  ),
+
+  pgpPublicRing := file("travis/local.pubring.asc"),
+  pgpSecretRing := file("travis/local.secring.asc"),
 )
 
 lazy val noPublishSettings = Seq(
