@@ -104,13 +104,11 @@ sealed trait Results {
 case class ResultLocation(relativeTo: Path)
 
 /** An empty collection of inhabitation results. */
-object Results {
-  def apply(implicit resultLocation: ResultLocation): Results = new Results {
-    val storeRelativeTo: Path = resultLocation.relativeTo
-    val targets: Seq[(Type, Option[BigInt])] = Seq.empty
-    val raw: Enumeration[Seq[Tree]] = Enumeration.singleton(Seq.empty)
-    val persistenceActions: Enumeration[Seq[() => Unit]] = Enumeration.singleton(Seq.empty)
-    val infinite: Boolean = false
-    val incomplete: Boolean = false
-  }
+case class EmptyResults()(implicit resultLocation: ResultLocation) extends Results {
+  val storeRelativeTo: Path = resultLocation.relativeTo
+  val targets: Seq[(Type, Option[BigInt])] = Seq.empty
+  val raw: Enumeration[Seq[Tree]] = Enumeration.singleton(Seq.empty)
+  val persistenceActions: Enumeration[Seq[() => Unit]] = Enumeration.singleton(Seq.empty)
+  val infinite: Boolean = false
+  val incomplete: Boolean = false
 }
