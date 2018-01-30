@@ -12,7 +12,7 @@ abstract class InhabitationRouter(productName: String, controller: InhabitationC
     case GET(p"/$prefix") if prefix == productName => controller.overview()
     case GET(p"/$prefix/raw_${long(number)}") if prefix == productName => controller.raw(number)
     case GET(p"/$prefix/prepare" ? q"number=${long(number)}") if prefix == productName => controller.prepare(number)
-    case GET(p"/$prefix/$repository.git/*$file") if prefix == productName && repository == productName =>
+    case GET(p"/$prefix/$repository.git/${file}*") if prefix == productName && repository == productName =>
       controller.serveFile(file)
   }
 }
