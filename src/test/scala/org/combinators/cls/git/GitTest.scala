@@ -46,7 +46,7 @@ class GitTestController @Inject()(webJars: WebJarsUtil, applicationLifecycle: Ap
 
   lazy val combinatorComponents: Map[String, CombinatorInfo] = Gamma.combinatorComponents
   lazy val results: Results =
-    EmptyResults().add(Gamma.inhabit[Path]())
+    EmptyInhabitationBatchJobResults(Gamma).addJob[Path]().compute()
 }
 
 class GitTest extends PlaySpec with GuiceOneServerPerSuite {
