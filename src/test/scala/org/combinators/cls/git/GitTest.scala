@@ -28,7 +28,8 @@ object Expected {
 
 class GitTestController @Inject()(webJars: WebJarsUtil, applicationLifecycle: ApplicationLifecycle)
   extends InhabitationController(webJars, applicationLifecycle) with RoutingEntries {
-  val routingPrefix: String = "gittest"
+  val controllerAddress: String = "gittest"
+  override val routingPrefix: Option[String] = Some("git")
   implicit val persistable: Persistable.Aux[Path] = new Persistable {
     override type T = Path
     override def rawText(elem: T): Array[Byte] = elem.toString.getBytes
@@ -53,7 +54,7 @@ class GitTest extends PlaySpec with GuiceOneServerPerSuite {
   val client = app.injector.instanceOf[WSClient]
   "Calling the gittest overview" must {
     "result in a valid response" in {
-      val request = s"/gittest"
+      val request = s"/git/gittest"
       val url = s"http://localhost:$port$request"
       val response = await(client.url(url).get())
       response.status mustBe OK
@@ -63,14 +64,14 @@ class GitTest extends PlaySpec with GuiceOneServerPerSuite {
   "Preparing the results" must {
     "result in a valid response" in {
       for (resultNumber <- Expected.expectedPaths.toSeq.indices) {
-        val request = s"/gittest/prepare?number=$resultNumber"
+        val request = s"/git/gittest/prepare?number=$resultNumber"
         val url = s"http://localhost:$port$request"
         val response = await(client.url(url).get())
         response.status mustBe OK
       }
     }
     "create valid git repositories" in {
-      val request = s"/gittest/gittest.git"
+      val request = s"/git/gittest/gittest.git"
       val url = s"http://localhost:$port$request"
       val tmpDir = File.createTempFile("gittest", "")
       tmpDir.delete() mustBe true // we want just the location

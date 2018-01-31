@@ -26,7 +26,7 @@ class EmptyTest extends PlaySpec with GuiceOneServerPerSuite {
 
 class EmptyTestController @Inject()(webJars: WebJarsUtil, applicationLifecycle: ApplicationLifecycle)
   extends InhabitationController(webJars, applicationLifecycle) with RoutingEntries {
-  val routingPrefix: String = "emptytest"
+  val controllerAddress: String = "emptytest"
   val combinatorComponents: Map[String, CombinatorInfo] = Map.empty
   val results: Results = EmptyResults()
 }
