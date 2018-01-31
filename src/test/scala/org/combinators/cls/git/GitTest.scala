@@ -27,7 +27,8 @@ object Expected {
 }
 
 class GitTestController @Inject()(webJars: WebJarsUtil, applicationLifecycle: ApplicationLifecycle)
-  extends InhabitationController(webJars, applicationLifecycle) {
+  extends InhabitationController(webJars, applicationLifecycle) with RoutingEntries {
+  val routingPrefix: String = "gittest"
   implicit val persistable: Persistable.Aux[Path] = new Persistable {
     override type T = Path
     override def rawText(elem: T): Array[Byte] = elem.toString.getBytes
@@ -38,17 +39,15 @@ class GitTestController @Inject()(webJars: WebJarsUtil, applicationLifecycle: Ap
   class TestCombinator(path: Path) {
     def apply: Path = path
   }
-  val Gamma: ReflectedRepository[Repository] =
+  lazy val Gamma: ReflectedRepository[Repository] =
     Expected.expectedPaths.foldLeft(ReflectedRepository(new Repository, classLoader = getClass.getClassLoader)) {
       (repo, path) => repo.addCombinator(new TestCombinator(path))
     }
 
-  override val combinatorComponents: Map[String, CombinatorInfo] = Gamma.combinatorComponents
-  override val results: Results =
+  lazy val combinatorComponents: Map[String, CombinatorInfo] = Gamma.combinatorComponents
+  lazy val results: Results =
     EmptyResults().add(Gamma.inhabit[Path]())
 }
-
-class GitTestRoutes @Inject()(controller: GitTestController) extends InhabitationRouter("gittest", controller)
 
 class GitTest extends PlaySpec with GuiceOneServerPerSuite {
   val client = app.injector.instanceOf[WSClient]

@@ -10,13 +10,6 @@ import play.api.inject.ApplicationLifecycle
 import play.api.libs.ws.WSClient
 import play.api.test.Helpers._
 
-class EmptyTestController @Inject()(webJars: WebJarsUtil, applicationLifecycle: ApplicationLifecycle)
-  extends InhabitationController(webJars, applicationLifecycle) {
-  override val combinatorComponents: Map[String, CombinatorInfo] = Map.empty
-  override val results: Results = EmptyResults()
-}
-
-class EmptyTestRoutes @Inject()(controller: EmptyTestController) extends InhabitationRouter("emptytest", controller)
 
 class EmptyTest extends PlaySpec with GuiceOneServerPerSuite {
   "Calling the emptytest overview" must {
@@ -31,3 +24,9 @@ class EmptyTest extends PlaySpec with GuiceOneServerPerSuite {
   }
 }
 
+class EmptyTestController @Inject()(webJars: WebJarsUtil, applicationLifecycle: ApplicationLifecycle)
+  extends InhabitationController(webJars, applicationLifecycle) with RoutingEntries {
+  val routingPrefix: String = "emptytest"
+  val combinatorComponents: Map[String, CombinatorInfo] = Map.empty
+  val results: Results = EmptyResults()
+}
