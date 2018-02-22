@@ -37,8 +37,8 @@ lazy val root = (Project(id = "cls-scala-presentation-play-git", base = file("."
         "org.combinators" %% "cls-scala" % "2.0.0-RC1",
         "org.combinators" %% "templating" % "1.0.0-RC1",
         "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test",
-        "org.eclipse.jgit" % "org.eclipse.jgit" % "4.9.0.201710071750-r",
-        "org.webjars" %% "webjars-play" % "2.6.1",
+        "org.eclipse.jgit" % "org.eclipse.jgit" % "4.10.0.201712302008-r",
+        "org.webjars" %% "webjars-play" % "2.6.3",
         "org.webjars" % "bootstrap" % "3.3.7-1",
         "commons-io" % "commons-io" % "2.6"
       ),
@@ -75,8 +75,3 @@ lazy val noPublishSettings = Seq(
   publishLocal := Seq.empty,
   publishArtifact := false
 )
-
-credentials in ThisBuild ++= (for {
-  username <- Option(System.getenv().get("SONATYPE_USERNAME"))
-  password <- Option(System.getenv().get("SONATYPE_PASSWORD"))
-} yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password)).toSeq
