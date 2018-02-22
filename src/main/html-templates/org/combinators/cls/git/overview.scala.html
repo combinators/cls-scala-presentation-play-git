@@ -38,8 +38,8 @@
 
     <title>Inhabitation</title>
     <!-- Bootstrap core CSS -->
-    @Html(webJars.css("css/bootstrap.min.css"))
-    @Html(webJars.requireJs(routes.Assets.at("ui_init.js")))
+    @Html(webJars.locate("css/bootstrap.min.css").css().body)
+    @Html(webJars.requireJs(routes.Assets.at("ui_init.js")).body)
     <style>
         .glyphicon-refresh-animate {
             -animation: spin .7s infinite linear;
