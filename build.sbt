@@ -6,7 +6,7 @@ import play.twirl.sbt.Import.TwirlKeys
 lazy val commonSettings = Seq(
   organization := "org.combinators",
 
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.10",
   crossScalaVersions := Seq("2.11.12", scalaVersion.value),
 
   resolvers ++= Seq(
