@@ -38,8 +38,8 @@
 
     <title>Inhabitation</title>
     <!-- Bootstrap core CSS -->
-    @Html(webJars.css("css/bootstrap.min.css"))
-    @Html(webJars.requireJs(routes.Assets.at("ui_init.js")))
+    @Html(webJars.locate("css/bootstrap.min.css").css().body)
+    @Html(webJars.requireJs(routes.Assets.at("ui_init.js")).body)
     <style>
         .glyphicon-refresh-animate {
             -animation: spin .7s infinite linear;
@@ -88,7 +88,7 @@
         @Html(targets.collect { case (ty, None) => s"&Gamma; &vdash; ? : ${ty.toString}" }.mkString("\n"))
     </pre>
 </div>
-} else {
+}
 @for(i <- 0 to (if (infinite) 100 else rawTerms.values.flatMap(_._2).size - 1)) {
 <nav class="navbar navbar-default">
     <div class="container-fluid">
@@ -110,7 +110,6 @@
         <pre id="solution_@Html(i.toString)" hidden/>
     </div>
 </nav>
-}
 }
 <h3>Repository:</h3>
 <pre>
