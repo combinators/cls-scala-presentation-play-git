@@ -88,7 +88,7 @@
         @Html(targets.collect { case (ty, None) => s"&Gamma; &vdash; ? : ${ty.toString}" }.mkString("\n"))
     </pre>
 </div>
-} else {
+}
 @for(i <- 0 to (if (infinite) 100 else rawTerms.values.flatMap(_._2).size - 1)) {
 <nav class="navbar navbar-default">
     <div class="container-fluid">
@@ -110,7 +110,6 @@
         <pre id="solution_@Html(i.toString)" hidden/>
     </div>
 </nav>
-}
 }
 <h3>Repository:</h3>
 <pre>
